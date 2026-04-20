@@ -1,6 +1,6 @@
 # Practice Social App
 
-Учебный fullstack-проект для практики.
+Учебный fullstack-проект для практики от компании Zuzex.
 
 ## Стек
 
