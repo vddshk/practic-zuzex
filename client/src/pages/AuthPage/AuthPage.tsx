@@ -1,13 +1,20 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ErrorMessage } from '../../components/ErrorMessage/ErrorMessage'
 import { InputField } from '../../components/InputField/InputField'
 import { RoleSelector } from '../../components/RoleSelector/RoleSelector'
+import { loginSuccess, type AuthUser } from '../../store/authSlice'
+import { useAppDispatch } from '../../store/hooks'
 import type { UserRole } from '../../types/auth'
+import { saveAuthUser } from '../../utils/authStorage'
 import './AuthPage.scss'
 
 type AuthMode = 'login' | 'register'
 
 export function AuthPage() {
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+
   const [mode, setMode] = useState<AuthMode>('login')
 
   const [firstName, setFirstName] = useState('')
@@ -28,6 +35,10 @@ export function AuthPage() {
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode)
     setErrors([])
+  }
+
+  const validateEmail = (value: string) => {
+    return /\S+@\S+\.\S+/.test(value)
   }
 
   const validateForm = () => {
@@ -52,6 +63,8 @@ export function AuthPage() {
 
       if (!email.trim()) {
         nextErrors.push('Введите email')
+      } else if (!validateEmail(email)) {
+        nextErrors.push('Введите корректный email')
       }
 
       if (password.length < 8) {
@@ -76,6 +89,25 @@ export function AuthPage() {
     return nextErrors.length === 0
   }
 
+  const buildMockUser = (): AuthUser => {
+    if (isRegister) {
+      return {
+        id: crypto.randomUUID(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        nickname: nickname.trim(),
+        email: email.trim(),
+        role: role as UserRole,
+      }
+    }
+
+    return {
+      id: crypto.randomUUID(),
+      nickname: nickname.trim(),
+      role: 'Frontend Developer',
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
@@ -85,12 +117,11 @@ export function AuthPage() {
       return
     }
 
-    if (mode === 'login') {
-      alert('Форма входа валидна. API подключим позже.')
-      return
-    }
+    const user = buildMockUser()
 
-    alert('Форма регистрации валидна. API подключим позже.')
+    dispatch(loginSuccess(user))
+    saveAuthUser(user)
+    navigate('/feed')
   }
 
   return (
