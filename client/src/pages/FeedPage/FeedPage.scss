@@ -83,61 +83,21 @@
   gap: 18px;
 }
 
-.feed-page__card {
-  padding: 24px;
+.feed-page__empty {
+  padding: 32px;
   border-radius: 20px;
   background-color: #ffffff;
   box-shadow: 0 12px 40px rgba(16, 24, 40, 0.08);
 }
 
-.feed-page__card-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.feed-page__badge {
-  border-radius: 999px;
-  padding: 6px 12px;
-  background-color: #111827;
-  color: #ffffff;
-  font-size: 13px;
-}
-
-.feed-page__direction {
-  color: #667085;
-  font-size: 14px;
-}
-
-.feed-page__card-title {
+.feed-page__empty-title {
   margin: 0 0 8px;
-  font-size: 24px;
+  font-size: 22px;
 }
 
-.feed-page__card-author {
-  margin: 0 0 12px;
-  color: #667085;
-}
-
-.feed-page__card-preview {
+.feed-page__empty-text {
   margin: 0;
-  color: #344054;
-  line-height: 1.7;
-}
-
-.feed-page__card-footer {
-  display: flex;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.feed-page__secondary-button {
-  border: 1px solid #d0d5dd;
-  border-radius: 12px;
-  padding: 10px 14px;
-  background-color: #ffffff;
-  cursor: pointer;
+  color: #667085;
 }
 
 @media (max-width: 960px) {
@@ -153,9 +113,5 @@
 
   .feed-page__title {
     font-size: 26px;
-  }
-
-  .feed-page__card-title {
-    font-size: 20px;
   }
 }
