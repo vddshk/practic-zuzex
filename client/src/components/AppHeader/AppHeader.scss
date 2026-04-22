@@ -1,0 +1,128 @@
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid #e4e7ec;
+  background-color: #ffffff;
+}
+
+.app-header__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.app-header__logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #111827;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.app-header__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.app-header__subtitle {
+  margin: 2px 0 0;
+  color: #667085;
+  font-size: 13px;
+}
+
+.app-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-header__link {
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #344054;
+  transition: 0.2s;
+}
+
+.app-header__link:hover {
+  background-color: #f2f4f7;
+}
+
+.app-header__link.active {
+  background-color: #111827;
+  color: #ffffff;
+}
+
+.app-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.app-header__user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.app-header__nickname {
+  font-weight: 600;
+}
+
+.app-header__role {
+  font-size: 13px;
+  color: #667085;
+}
+
+.app-header__logout {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background-color: #111827;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .app-header__inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-header__actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-header__nav {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .app-header__actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-header__user {
+    align-items: flex-start;
+  }
+}
