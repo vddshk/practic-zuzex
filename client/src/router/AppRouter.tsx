@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
+import { AppLayout } from '../components/AppLayout/AppLayout'
 import { AuthPage } from '../pages/AuthPage/AuthPage'
 import { FeedPage } from '../pages/FeedPage/FeedPage'
 import { NotFoundPage } from '../pages/NotFoundPage/NotFoundPage'
@@ -19,22 +20,15 @@ export function AppRouter() {
       />
 
       <Route
-        path="/feed"
         element={
           <ProtectedRoute>
-            <FeedPage />
+            <AppLayout />
           </ProtectedRoute>
         }
-      />
-
-      <Route
-        path="/profile/:id"
-        element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        }
-      />
+      >
+        <Route path="/feed" element={<FeedPage />} />
+        <Route path="/profile/:id" element={<ProfilePage />} />
+      </Route>
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

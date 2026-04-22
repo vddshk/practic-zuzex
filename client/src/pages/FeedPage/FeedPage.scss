@@ -1,0 +1,161 @@
+.feed-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.feed-page__hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px;
+  border-radius: 24px;
+  background-color: #ffffff;
+  box-shadow: 0 12px 40px rgba(16, 24, 40, 0.08);
+}
+
+.feed-page__eyebrow {
+  margin: 0 0 8px;
+  color: #667085;
+  font-size: 14px;
+}
+
+.feed-page__title {
+  margin: 0 0 10px;
+  font-size: 32px;
+  line-height: 1.1;
+}
+
+.feed-page__subtitle {
+  margin: 0;
+  max-width: 700px;
+  color: #667085;
+  line-height: 1.6;
+}
+
+.feed-page__create-button {
+  border: none;
+  border-radius: 14px;
+  padding: 14px 18px;
+  background-color: #111827;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.feed-page__grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+
+.feed-page__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feed-page__panel {
+  padding: 20px;
+  border-radius: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 12px 40px rgba(16, 24, 40, 0.08);
+}
+
+.feed-page__panel-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.feed-page__panel-text {
+  margin: 0;
+  color: #667085;
+  line-height: 1.6;
+}
+
+.feed-page__panel-text + .feed-page__panel-text {
+  margin-top: 8px;
+}
+
+.feed-page__content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.feed-page__card {
+  padding: 24px;
+  border-radius: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 12px 40px rgba(16, 24, 40, 0.08);
+}
+
+.feed-page__card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.feed-page__badge {
+  border-radius: 999px;
+  padding: 6px 12px;
+  background-color: #111827;
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.feed-page__direction {
+  color: #667085;
+  font-size: 14px;
+}
+
+.feed-page__card-title {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+.feed-page__card-author {
+  margin: 0 0 12px;
+  color: #667085;
+}
+
+.feed-page__card-preview {
+  margin: 0;
+  color: #344054;
+  line-height: 1.7;
+}
+
+.feed-page__card-footer {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.feed-page__secondary-button {
+  border: 1px solid #d0d5dd;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+@media (max-width: 960px) {
+  .feed-page__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .feed-page__hero {
+    flex-direction: column;
+  }
+
+  .feed-page__title {
+    font-size: 26px;
+  }
+
+  .feed-page__card-title {
+    font-size: 20px;
+  }
+}
