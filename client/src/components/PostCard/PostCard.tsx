@@ -5,9 +5,12 @@ import './PostCard.scss'
 
 type PostCardProps = {
   post: Post
+  isOwner: boolean
+  onEdit: (post: Post) => void
+  onDelete: (postId: string) => void
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, isOwner, onEdit, onDelete }: PostCardProps) {
   const dispatch = useAppDispatch()
 
   return (
@@ -24,13 +27,35 @@ export function PostCard({ post }: PostCardProps) {
       <p className="post-card__content">{post.content}</p>
 
       <div className="post-card__footer">
-        <button
-          type="button"
-          className={`post-card__like-button ${post.isLikedByUser ? 'active' : ''}`}
-          onClick={() => dispatch(toggleLike(post.id))}
-        >
-          {post.isLikedByUser ? 'Убрать лайк' : 'Поставить лайк'}
-        </button>
+        <div className="post-card__left-actions">
+          <button
+            type="button"
+            className={`post-card__like-button ${post.isLikedByUser ? 'active' : ''}`}
+            onClick={() => dispatch(toggleLike(post.id))}
+          >
+            {post.isLikedByUser ? 'Убрать лайк' : 'Поставить лайк'}
+          </button>
+
+          {isOwner && (
+            <>
+              <button
+                type="button"
+                className="post-card__action-button"
+                onClick={() => onEdit(post)}
+              >
+                Редактировать
+              </button>
+
+              <button
+                type="button"
+                className="post-card__delete-button"
+                onClick={() => onDelete(post.id)}
+              >
+                Удалить
+              </button>
+            </>
+          )}
+        </div>
 
         <span className="post-card__likes">Лайков: {post.likes}</span>
       </div>

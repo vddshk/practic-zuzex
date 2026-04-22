@@ -80,8 +80,31 @@ const feedSlice = createSlice({
         post.likes += 1
       }
     },
+    addPost(state, action: PayloadAction<Post>) {
+      state.posts.unshift(action.payload)
+    },
+    updatePost(state, action: PayloadAction<Post>) {
+      const index = state.posts.findIndex((post) => post.id === action.payload.id)
+
+      if (index === -1) {
+        return
+      }
+
+      state.posts[index] = action.payload
+    },
+    deletePost(state, action: PayloadAction<string>) {
+      state.posts = state.posts.filter((post) => post.id !== action.payload)
+    },
   },
 })
 
-export const { setTypeFilter, setDirectionFilter, toggleLike } = feedSlice.actions
+export const {
+  setTypeFilter,
+  setDirectionFilter,
+  toggleLike,
+  addPost,
+  updatePost,
+  deletePost,
+} = feedSlice.actions
+
 export const feedReducer = feedSlice.reducer
