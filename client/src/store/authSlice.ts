@@ -28,16 +28,39 @@ const authSlice = createSlice({
       state.isAuthenticated = true
       state.user = action.payload
     },
+
     logout(state) {
       state.isAuthenticated = false
       state.user = null
     },
+
     restoreSession(state, action: PayloadAction<AuthUser | null>) {
       state.isAuthenticated = Boolean(action.payload)
       state.user = action.payload
     },
+
+    updateCurrentUserProfile(
+      state,
+      action: PayloadAction<{
+        firstName: string
+        lastName: string
+        nickname: string
+        role: UserRole
+      }>,
+    ) {
+      if (!state.user) {
+        return
+      }
+
+      state.user.firstName = action.payload.firstName
+      state.user.lastName = action.payload.lastName
+      state.user.nickname = action.payload.nickname
+      state.user.role = action.payload.role
+    },
   },
 })
 
-export const { loginSuccess, logout, restoreSession } = authSlice.actions
+export const { loginSuccess, logout, restoreSession, updateCurrentUserProfile } =
+  authSlice.actions
+
 export const authReducer = authSlice.reducer

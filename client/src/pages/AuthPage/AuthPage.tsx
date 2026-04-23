@@ -4,9 +4,11 @@ import { ErrorMessage } from '../../components/ErrorMessage/ErrorMessage'
 import { InputField } from '../../components/InputField/InputField'
 import { RoleSelector } from '../../components/RoleSelector/RoleSelector'
 import { loginSuccess, type AuthUser } from '../../store/authSlice'
+import { syncProfileFromAuth } from '../../store/profileSlice'
 import { useAppDispatch } from '../../store/hooks'
 import type { UserRole } from '../../types/auth'
 import { saveAuthUser } from '../../utils/authStorage'
+import { saveUserProfile } from '../../utils/profileStorage'
 import './AuthPage.scss'
 
 type AuthMode = 'login' | 'register'
@@ -120,8 +122,22 @@ export function AuthPage() {
     const user = buildMockUser()
 
     dispatch(loginSuccess(user))
+    dispatch(syncProfileFromAuth(user))
+
     saveAuthUser(user)
-    navigate('/feed')
+    saveUserProfile({
+      userId: user.id,
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
+      nickname: user.nickname,
+      role: user.role,
+      email: user.email ?? '',
+      description: '',
+      workplace: '',
+      portfolio: [],
+})
+
+navigate('/feed')
   }
 
   return (
