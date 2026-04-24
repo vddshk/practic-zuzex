@@ -6,7 +6,11 @@ type ProtectedRouteProps = {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated)
+  const { isAuthenticated, isAuthChecked } = useAppSelector((state) => state.auth)
+
+  if (!isAuthChecked) {
+    return <div style={{ padding: '24px' }}>Загрузка...</div>
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />

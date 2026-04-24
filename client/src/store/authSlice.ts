@@ -12,11 +12,13 @@ export type AuthUser = {
 
 type AuthState = {
   isAuthenticated: boolean
+  isAuthChecked: boolean
   user: AuthUser | null
 }
 
 const initialState: AuthState = {
   isAuthenticated: false,
+  isAuthChecked: false,
   user: null,
 }
 
@@ -26,16 +28,19 @@ const authSlice = createSlice({
   reducers: {
     loginSuccess(state, action: PayloadAction<AuthUser>) {
       state.isAuthenticated = true
+      state.isAuthChecked = true
       state.user = action.payload
     },
 
     logout(state) {
       state.isAuthenticated = false
+      state.isAuthChecked = true
       state.user = null
     },
 
     restoreSession(state, action: PayloadAction<AuthUser | null>) {
       state.isAuthenticated = Boolean(action.payload)
+      state.isAuthChecked = true
       state.user = action.payload
     },
 

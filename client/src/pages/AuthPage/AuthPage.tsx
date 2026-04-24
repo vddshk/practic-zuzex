@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { loginUser, registerUser } from '../../api/authApi'
 import { ErrorMessage } from '../../components/ErrorMessage/ErrorMessage'
 import { InputField } from '../../components/InputField/InputField'
 import { RoleSelector } from '../../components/RoleSelector/RoleSelector'
 import { loginSuccess, type AuthUser } from '../../store/authSlice'
-import { syncProfileFromAuth } from '../../store/profileSlice'
 import { useAppDispatch } from '../../store/hooks'
+import { syncProfileFromAuth } from '../../store/profileSlice'
 import type { UserRole } from '../../types/auth'
 import { saveAuthUser } from '../../utils/authStorage'
 import { saveUserProfile } from '../../utils/profileStorage'
@@ -27,6 +28,7 @@ export function AuthPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [role, setRole] = useState<UserRole | ''>('')
   const [errors, setErrors] = useState<string[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const isRegister = mode === 'register'
 
@@ -39,9 +41,7 @@ export function AuthPage() {
     setErrors([])
   }
 
-  const validateEmail = (value: string) => {
-    return /\S+@\S+\.\S+/.test(value)
-  }
+  const validateEmail = (value: string) => /\S+@\S+\.\S+/.test(value)
 
   const validateForm = () => {
     const nextErrors: string[] = []
@@ -87,44 +87,14 @@ export function AuthPage() {
     }
 
     setErrors(nextErrors)
-
     return nextErrors.length === 0
   }
 
-  const buildMockUser = (): AuthUser => {
-    if (isRegister) {
-      return {
-        id: crypto.randomUUID(),
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        nickname: nickname.trim(),
-        email: email.trim(),
-        role: role as UserRole,
-      }
-    }
-
-    return {
-      id: crypto.randomUUID(),
-      nickname: nickname.trim(),
-      role: 'Frontend Developer',
-    }
-  }
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    const isValid = validateForm()
-
-    if (!isValid) {
-      return
-    }
-
-    const user = buildMockUser()
-
+  const saveLocalUserState = (user: AuthUser) => {
     dispatch(loginSuccess(user))
     dispatch(syncProfileFromAuth(user))
-
     saveAuthUser(user)
+
     saveUserProfile({
       userId: user.id,
       firstName: user.firstName ?? '',
@@ -135,9 +105,48 @@ export function AuthPage() {
       description: '',
       workplace: '',
       portfolio: [],
-})
+    })
+  }
 
-navigate('/feed')
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    const isValid = validateForm()
+
+    if (!isValid) {
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      setErrors([])
+
+      if (mode === 'register') {
+        await registerUser({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          nickname: nickname.trim(),
+          email: email.trim(),
+          password,
+          confirmPassword,
+          role: role as UserRole,
+        })
+      }
+
+      const loginResponse = await loginUser({
+        nickname: nickname.trim(),
+        password,
+      })
+
+      saveLocalUserState(loginResponse.user)
+      navigate('/feed')
+    } catch (error) {
+      setErrors([
+        error instanceof Error ? error.message : 'Не удалось выполнить авторизацию',
+      ])
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -256,8 +265,12 @@ navigate('/feed')
             </>
           )}
 
-          <button type="submit" className="auth-submit-button">
-            {isRegister ? 'Зарегистрироваться' : 'Войти'}
+          <button type="submit" className="auth-submit-button" disabled={isSubmitting}>
+            {isSubmitting
+              ? 'Подождите...'
+              : isRegister
+                ? 'Зарегистрироваться'
+                : 'Войти'}
           </button>
         </form>
       </div>
