@@ -1,8 +1,15 @@
 import { useState } from 'react'
 import { ProfileEditForm } from '../../components/ProfileEditForm/ProfileEditForm'
+import { ProjectForm } from '../../components/ProjectForm/ProjectForm'
 import { updateCurrentUserProfile } from '../../store/authSlice'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import { updateProfile } from '../../store/profileSlice'
+import {
+  addPortfolioProject,
+  deletePortfolioProject,
+  updatePortfolioProject,
+  updateProfile,
+} from '../../store/profileSlice'
+import type { PortfolioProject } from '../../types/profile'
 import { saveAuthUser } from '../../utils/authStorage'
 import { saveUserProfile } from '../../utils/profileStorage'
 import './ProfilePage.scss'
@@ -10,7 +17,10 @@ import './ProfilePage.scss'
 export function ProfilePage() {
   const dispatch = useAppDispatch()
   const profile = useAppSelector((state) => state.profile.profile)
+
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isProjectFormOpen, setIsProjectFormOpen] = useState(false)
+  const [editingProject, setEditingProject] = useState<PortfolioProject | null>(null)
 
   if (!profile) {
     return (
@@ -65,6 +75,79 @@ export function ProfilePage() {
     setIsEditOpen(false)
   }
 
+  const handleOpenCreateProject = () => {
+    setEditingProject(null)
+    setIsProjectFormOpen(true)
+  }
+
+  const handleOpenEditProject = (project: PortfolioProject) => {
+    setEditingProject(project)
+    setIsProjectFormOpen(true)
+  }
+
+  const handleCloseProjectForm = () => {
+    setEditingProject(null)
+    setIsProjectFormOpen(false)
+  }
+
+  const handleSubmitProject = (values: {
+    title: string
+    description: string
+    links: string[]
+  }) => {
+    if (editingProject) {
+      const updatedProject: PortfolioProject = {
+        ...editingProject,
+        title: values.title,
+        description: values.description,
+        links: values.links,
+      }
+
+      dispatch(updatePortfolioProject(updatedProject))
+
+      saveUserProfile({
+        ...profile,
+        portfolio: profile.portfolio.map((project) =>
+          project.id === updatedProject.id ? updatedProject : project,
+        ),
+      })
+
+      handleCloseProjectForm()
+      return
+    }
+
+    const newProject: PortfolioProject = {
+      id: crypto.randomUUID(),
+      title: values.title,
+      description: values.description,
+      links: values.links,
+    }
+
+    dispatch(addPortfolioProject(newProject))
+
+    saveUserProfile({
+      ...profile,
+      portfolio: [newProject, ...profile.portfolio],
+    })
+
+    handleCloseProjectForm()
+  }
+
+  const handleDeleteProject = (projectId: string) => {
+    const shouldDelete = window.confirm('Удалить этот проект?')
+
+    if (!shouldDelete) {
+      return
+    }
+
+    dispatch(deletePortfolioProject(projectId))
+
+    saveUserProfile({
+      ...profile,
+      portfolio: profile.portfolio.filter((project) => project.id !== projectId),
+    })
+  }
+
   return (
     <section className="profile-page">
       <div className="profile-page__header">
@@ -90,7 +173,11 @@ export function ProfilePage() {
             {isEditOpen ? 'Закрыть редактирование' : 'Редактировать профиль'}
           </button>
 
-          <button type="button" className="profile-page__secondary-button">
+          <button
+            type="button"
+            className="profile-page__secondary-button"
+            onClick={handleOpenCreateProject}
+          >
             Добавить проект
           </button>
         </div>
@@ -101,6 +188,14 @@ export function ProfilePage() {
           profile={profile}
           onSubmit={handleSaveProfile}
           onCancel={() => setIsEditOpen(false)}
+        />
+      )}
+
+      {isProjectFormOpen && (
+        <ProjectForm
+          initialProject={editingProject}
+          onSubmit={handleSubmitProject}
+          onCancel={handleCloseProjectForm}
         />
       )}
 
@@ -132,12 +227,61 @@ export function ProfilePage() {
 
         <div className="profile-page__content">
           <h2 className="profile-page__section-title">Портфолио</h2>
-          <p className="profile-page__panel-text">
-            Проектов в портфолио: {profile.portfolio.length}
-          </p>
-          <p className="profile-page__panel-text" style={{ marginTop: '12px' }}>
-            Следующим шагом добавим создание, редактирование и удаление проектов.
-          </p>
+
+          {profile.portfolio.length > 0 ? (
+            <div className="profile-page__projects">
+              {profile.portfolio.map((project) => (
+                <article key={project.id} className="profile-page__project-card">
+                  <h3 className="profile-page__project-title">{project.title}</h3>
+
+                  <p className="profile-page__project-description">
+                    {project.description || 'Описание проекта не заполнено.'}
+                  </p>
+
+                  {project.links.length > 0 && (
+                    <div className="profile-page__project-links">
+                      {project.links.map((link) => (
+                        <a
+                          key={link}
+                          className="profile-page__project-link"
+                          href={link}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {link}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="profile-page__project-actions">
+                    <button
+                      type="button"
+                      className="profile-page__project-edit"
+                      onClick={() => handleOpenEditProject(project)}
+                    >
+                      Редактировать
+                    </button>
+
+                    <button
+                      type="button"
+                      className="profile-page__project-delete"
+                      onClick={() => handleDeleteProject(project.id)}
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="profile-page__empty">
+              <h3 className="profile-page__empty-title">Портфолио пока пустое</h3>
+              <p className="profile-page__empty-text">
+                Добавь первый проект, чтобы заполнить профиль.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </section>

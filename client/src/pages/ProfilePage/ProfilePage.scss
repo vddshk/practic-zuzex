@@ -149,16 +149,54 @@
 
 .profile-page__project-links {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
   margin-top: 14px;
 }
 
 .profile-page__project-link {
-  border-radius: 999px;
-  padding: 6px 10px;
-  background-color: #f2f4f7;
-  font-size: 13px;
+  color: #101828;
+  word-break: break-word;
+}
+
+.profile-page__project-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.profile-page__project-edit,
+.profile-page__project-delete {
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.profile-page__project-edit {
+  border: 1px solid #d0d5dd;
+  background-color: #ffffff;
+}
+
+.profile-page__project-delete {
+  border: 1px solid #fda29b;
+  background-color: #fff5f4;
+  color: #b42318;
+}
+
+.profile-page__empty {
+  padding: 24px;
+  border: 1px dashed #d0d5dd;
+  border-radius: 18px;
+}
+
+.profile-page__empty-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.profile-page__empty-text {
+  margin: 0;
+  color: #667085;
 }
 
 @media (max-width: 960px) {
@@ -183,6 +221,10 @@
 
   .profile-page__actions {
     width: 100%;
+    flex-direction: column;
+  }
+
+  .profile-page__project-actions {
     flex-direction: column;
   }
 }

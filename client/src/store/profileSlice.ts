@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { AuthUser } from './authSlice'
-import type { UserProfile } from '../types/profile'
+import type { PortfolioProject, UserProfile } from '../types/profile'
 import type { UserRole } from '../types/auth'
 
 type ProfileState = {
@@ -72,6 +72,40 @@ const profileSlice = createSlice({
       state.profile.workplace = action.payload.workplace
     },
 
+    addPortfolioProject(state, action: PayloadAction<PortfolioProject>) {
+      if (!state.profile) {
+        return
+      }
+
+      state.profile.portfolio.unshift(action.payload)
+    },
+
+    updatePortfolioProject(state, action: PayloadAction<PortfolioProject>) {
+      if (!state.profile) {
+        return
+      }
+
+      const index = state.profile.portfolio.findIndex(
+        (project) => project.id === action.payload.id,
+      )
+
+      if (index === -1) {
+        return
+      }
+
+      state.profile.portfolio[index] = action.payload
+    },
+
+    deletePortfolioProject(state, action: PayloadAction<string>) {
+      if (!state.profile) {
+        return
+      }
+
+      state.profile.portfolio = state.profile.portfolio.filter(
+        (project) => project.id !== action.payload,
+      )
+    },
+
     clearProfile(state) {
       state.profile = null
     },
@@ -82,6 +116,9 @@ export const {
   restoreStoredProfile,
   syncProfileFromAuth,
   updateProfile,
+  addPortfolioProject,
+  updatePortfolioProject,
+  deletePortfolioProject,
   clearProfile,
 } = profileSlice.actions
 
