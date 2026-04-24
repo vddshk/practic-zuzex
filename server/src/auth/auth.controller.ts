@@ -23,6 +23,11 @@ export class AuthController {
     return this.authService.login(dto, response)
   }
 
+  @Post('logout')
+  logout(@Res({ passthrough: true }) response: Response) {
+    return this.authService.logout(response)
+  }
+
   @Get('me')
   me(@Req() request: Request) {
     return this.authService.me(request)

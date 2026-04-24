@@ -4,15 +4,25 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
 import type { Request, Response } from 'express'
 import { UsersService } from '../users/users.service'
 import { LoginDto } from './dto/login.dto'
 import { RegisterDto } from './dto/register.dto'
 
+type JwtPayload = {
+  sub: string
+  nickname: string
+  role: string
+}
+
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async register(dto: RegisterDto) {
     if (dto.password !== dto.confirmPassword) {
@@ -68,9 +78,19 @@ export class AuthService {
       throw new UnauthorizedException('Invalid nickname or password')
     }
 
-    response.cookie('userId', user.id, {
+    const payload: JwtPayload = {
+      sub: user.id,
+      nickname: user.nickname,
+      role: user.role,
+    }
+
+    const token = await this.jwtService.signAsync(payload)
+
+    response.cookie('token', token, {
       httpOnly: true,
       sameSite: 'lax',
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     })
 
     return {
@@ -86,35 +106,55 @@ export class AuthService {
     }
   }
 
-  async me(request: Request) {
-    const userId = request.cookies?.userId
-
-    if (!userId) {
-      return {
-        isAuthenticated: false,
-        user: null,
-      }
-    }
-
-    const user = await this.usersService.findById(userId)
-
-    if (!user) {
-      return {
-        isAuthenticated: false,
-        user: null,
-      }
-    }
+  logout(response: Response) {
+    response.clearCookie('token', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+    })
 
     return {
-      isAuthenticated: true,
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        nickname: user.nickname,
-        email: user.email,
-        role: user.role,
-      },
+      message: 'Logout successful',
+    }
+  }
+
+  async me(request: Request) {
+    const token = request.cookies?.token
+
+    if (!token) {
+      return {
+        isAuthenticated: false,
+        user: null,
+      }
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(token)
+      const user = await this.usersService.findById(payload.sub)
+
+      if (!user) {
+        return {
+          isAuthenticated: false,
+          user: null,
+        }
+      }
+
+      return {
+        isAuthenticated: true,
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          nickname: user.nickname,
+          email: user.email,
+          role: user.role,
+        },
+      }
+    } catch {
+      return {
+        isAuthenticated: false,
+        user: null,
+      }
     }
   }
 
