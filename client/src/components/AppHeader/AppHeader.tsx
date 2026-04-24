@@ -3,6 +3,8 @@ import { clearAuthUser } from '../../utils/authStorage'
 import { logout } from '../../store/authSlice'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import './AppHeader.scss'
+import { clearProfile } from '../../store/profileSlice'
+import { clearUserProfile } from '../../utils/profileStorage'
 
 export function AppHeader() {
   const dispatch = useAppDispatch()
@@ -11,7 +13,9 @@ export function AppHeader() {
 
   const handleLogout = () => {
     dispatch(logout())
+    dispatch(clearProfile())
     clearAuthUser()
+    clearUserProfile()
     navigate('/')
   }
 
