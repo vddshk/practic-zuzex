@@ -1,17 +1,24 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { clearAuthUser } from '../../utils/authStorage'
+import { logoutUser } from '../../api/authApi'
 import { logout } from '../../store/authSlice'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import './AppHeader.scss'
 import { clearProfile } from '../../store/profileSlice'
+import { clearAuthUser } from '../../utils/authStorage'
 import { clearUserProfile } from '../../utils/profileStorage'
+import './AppHeader.scss'
 
 export function AppHeader() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const user = useAppSelector((state) => state.auth.user)
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutUser()
+    } catch {
+      // локальное состояние всё равно чистим
+    }
+
     dispatch(logout())
     dispatch(clearProfile())
     clearAuthUser()
