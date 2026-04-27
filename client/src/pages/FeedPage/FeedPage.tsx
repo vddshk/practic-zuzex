@@ -1,8 +1,21 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import {
+  createPost as createPostRequest,
+  deletePost as deletePostRequest,
+  fetchPosts,
+  likePost,
+  unlikePost,
+  updatePost as updatePostRequest,
+} from '../../api/postsApi'
 import { FilterBar } from '../../components/FilterBar/FilterBar'
 import { PostCard } from '../../components/PostCard/PostCard'
 import { PostForm } from '../../components/PostForm/PostForm'
-import { addPost, deletePost, updatePost } from '../../store/feedSlice'
+import {
+  addPost,
+  deletePost,
+  setPosts,
+  updatePost,
+} from '../../store/feedSlice'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import type { Post } from '../../types/post'
 import './FeedPage.scss'
@@ -15,14 +28,30 @@ export function FeedPage() {
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingPost, setEditingPost] = useState<Post | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string>('')
 
-  const filteredPosts = posts.filter((post) => {
-    const matchesType = filters.type === 'Все' || post.type === filters.type
-    const matchesDirection =
-      filters.direction === 'Все' || post.direction === filters.direction
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        setIsLoading(true)
+        setError('')
 
-    return matchesType && matchesDirection
-  })
+        const data = await fetchPosts({
+          type: filters.type,
+          direction: filters.direction,
+        })
+
+        dispatch(setPosts(data))
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Не удалось загрузить посты')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void loadPosts()
+  }, [dispatch, filters.type, filters.direction])
 
   const handleOpenCreate = () => {
     setEditingPost(null)
@@ -39,51 +68,58 @@ export function FeedPage() {
     setIsFormOpen(false)
   }
 
-  const handleSubmitPost = (values: {
+  const handleSubmitPost = async (values: {
     title: string
     content: string
     type: Post['type']
     direction: Post['direction']
   }) => {
-    if (!user) {
-      return
-    }
+    try {
+      setError('')
 
-    if (editingPost) {
-      dispatch(
-        updatePost({
-          ...editingPost,
-          ...values,
-        }),
-      )
+      if (editingPost) {
+        const updatedPost = await updatePostRequest(editingPost.id, values)
+        dispatch(updatePost(updatedPost))
+        handleCloseForm()
+        return
+      }
+
+      const createdPost = await createPostRequest(values)
+      dispatch(addPost(createdPost))
       handleCloseForm()
-      return
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось сохранить пост')
     }
-
-    dispatch(
-      addPost({
-        id: crypto.randomUUID(),
-        title: values.title,
-        content: values.content,
-        author: user.nickname,
-        type: values.type,
-        direction: values.direction,
-        likes: 0,
-        isLikedByUser: false,
-      }),
-    )
-
-    handleCloseForm()
   }
 
-  const handleDeletePost = (postId: string) => {
+  const handleDeletePost = async (postId: string) => {
     const shouldDelete = window.confirm('Удалить этот пост?')
 
     if (!shouldDelete) {
       return
     }
 
-    dispatch(deletePost(postId))
+    try {
+      setError('')
+      await deletePostRequest(postId)
+      dispatch(deletePost(postId))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось удалить пост')
+    }
+  }
+
+  const handleToggleLike = async (post: Post) => {
+    try {
+      setError('')
+
+      const updatedPost = post.isLikedByUser
+        ? await unlikePost(post.id)
+        : await likePost(post.id)
+
+      dispatch(updatePost(updatedPost))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось обновить лайк')
+    }
   }
 
   return (
@@ -93,8 +129,8 @@ export function FeedPage() {
           <p className="feed-page__eyebrow">Главная страница</p>
           <h1 className="feed-page__title">Добро пожаловать, {user?.nickname}</h1>
           <p className="feed-page__subtitle">
-            Теперь лента умеет не только фильтровать посты и ставить лайки, но и
-            создавать, редактировать и удалять ваши публикации.
+            Теперь лента работает через backend API: посты загружаются с сервера,
+            создаются, редактируются, удаляются и лайкаются по-настоящему.
           </p>
         </div>
 
@@ -117,6 +153,13 @@ export function FeedPage() {
 
       <FilterBar />
 
+      {error && (
+        <div className="feed-page__empty">
+          <h3 className="feed-page__empty-title">Ошибка</h3>
+          <p className="feed-page__empty-text">{error}</p>
+        </div>
+      )}
+
       <div className="feed-page__grid">
         <aside className="feed-page__sidebar">
           <div className="feed-page__panel">
@@ -129,19 +172,25 @@ export function FeedPage() {
             <h2 className="feed-page__panel-title">Ваш профиль</h2>
             <p className="feed-page__panel-text">Никнейм: {user?.nickname}</p>
             <p className="feed-page__panel-text">Роль: {user?.role}</p>
-            <p className="feed-page__panel-text">Постов в ленте: {filteredPosts.length}</p>
+            <p className="feed-page__panel-text">Постов в ленте: {posts.length}</p>
           </div>
         </aside>
 
         <div className="feed-page__content">
-          {filteredPosts.length > 0 ? (
-            filteredPosts.map((post) => (
+          {isLoading ? (
+            <div className="feed-page__empty">
+              <h3 className="feed-page__empty-title">Загрузка</h3>
+              <p className="feed-page__empty-text">Подождите, посты загружаются.</p>
+            </div>
+          ) : posts.length > 0 ? (
+            posts.map((post) => (
               <PostCard
                 key={post.id}
                 post={post}
                 isOwner={post.author === user?.nickname}
                 onEdit={handleOpenEdit}
                 onDelete={handleDeletePost}
+                onToggleLike={handleToggleLike}
               />
             ))
           ) : (

@@ -1,5 +1,3 @@
-import { toggleLike } from '../../store/feedSlice'
-import { useAppDispatch } from '../../store/hooks'
 import type { Post } from '../../types/post'
 import './PostCard.scss'
 
@@ -8,11 +6,16 @@ type PostCardProps = {
   isOwner: boolean
   onEdit: (post: Post) => void
   onDelete: (postId: string) => void
+  onToggleLike: (post: Post) => void
 }
 
-export function PostCard({ post, isOwner, onEdit, onDelete }: PostCardProps) {
-  const dispatch = useAppDispatch()
-
+export function PostCard({
+  post,
+  isOwner,
+  onEdit,
+  onDelete,
+  onToggleLike,
+}: PostCardProps) {
   return (
     <article className="post-card">
       <div className="post-card__meta">
@@ -31,7 +34,7 @@ export function PostCard({ post, isOwner, onEdit, onDelete }: PostCardProps) {
           <button
             type="button"
             className={`post-card__like-button ${post.isLikedByUser ? 'active' : ''}`}
-            onClick={() => dispatch(toggleLike(post.id))}
+            onClick={() => onToggleLike(post)}
           >
             {post.isLikedByUser ? 'Убрать лайк' : 'Поставить лайк'}
           </button>
