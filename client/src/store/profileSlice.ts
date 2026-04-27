@@ -1,7 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { AuthUser } from './authSlice'
-import type { PortfolioProject, UserProfile } from '../types/profile'
-import type { UserRole } from '../types/auth'
+import type { UserProfile } from '../types/profile'
 
 type ProfileState = {
   profile: UserProfile | null
@@ -15,95 +13,8 @@ const profileSlice = createSlice({
   name: 'profile',
   initialState,
   reducers: {
-    restoreStoredProfile(state, action: PayloadAction<UserProfile | null>) {
+    setProfile(state, action: PayloadAction<UserProfile | null>) {
       state.profile = action.payload
-    },
-
-    syncProfileFromAuth(state, action: PayloadAction<AuthUser | null>) {
-      const user = action.payload
-
-      if (!user) {
-        state.profile = null
-        return
-      }
-
-      if (state.profile && state.profile.userId === user.id) {
-        state.profile.firstName = user.firstName ?? state.profile.firstName
-        state.profile.lastName = user.lastName ?? state.profile.lastName
-        state.profile.nickname = user.nickname
-        state.profile.role = user.role
-        state.profile.email = user.email ?? state.profile.email
-        return
-      }
-
-      state.profile = {
-        userId: user.id,
-        firstName: user.firstName ?? '',
-        lastName: user.lastName ?? '',
-        nickname: user.nickname,
-        role: user.role,
-        email: user.email ?? '',
-        description: '',
-        workplace: '',
-        portfolio: [],
-      }
-    },
-
-    updateProfile(
-      state,
-      action: PayloadAction<{
-        firstName: string
-        lastName: string
-        nickname: string
-        role: UserRole
-        description: string
-        workplace: string
-      }>,
-    ) {
-      if (!state.profile) {
-        return
-      }
-
-      state.profile.firstName = action.payload.firstName
-      state.profile.lastName = action.payload.lastName
-      state.profile.nickname = action.payload.nickname
-      state.profile.role = action.payload.role
-      state.profile.description = action.payload.description
-      state.profile.workplace = action.payload.workplace
-    },
-
-    addPortfolioProject(state, action: PayloadAction<PortfolioProject>) {
-      if (!state.profile) {
-        return
-      }
-
-      state.profile.portfolio.unshift(action.payload)
-    },
-
-    updatePortfolioProject(state, action: PayloadAction<PortfolioProject>) {
-      if (!state.profile) {
-        return
-      }
-
-      const index = state.profile.portfolio.findIndex(
-        (project) => project.id === action.payload.id,
-      )
-
-      if (index === -1) {
-        return
-      }
-
-      state.profile.portfolio[index] = action.payload
-    },
-
-    deletePortfolioProject(state, action: PayloadAction<string>) {
-      if (!state.profile) {
-        return
-      }
-
-      state.profile.portfolio = state.profile.portfolio.filter(
-        (project) => project.id !== action.payload,
-      )
     },
 
     clearProfile(state) {
@@ -112,14 +23,5 @@ const profileSlice = createSlice({
   },
 })
 
-export const {
-  restoreStoredProfile,
-  syncProfileFromAuth,
-  updateProfile,
-  addPortfolioProject,
-  updatePortfolioProject,
-  deletePortfolioProject,
-  clearProfile,
-} = profileSlice.actions
-
+export const { setProfile, clearProfile } = profileSlice.actions
 export const profileReducer = profileSlice.reducer

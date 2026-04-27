@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import {
+  addPortfolioProject as addPortfolioProjectRequest,
+  deletePortfolioProject as deletePortfolioProjectRequest,
+  fetchMyProfile,
+  updateMyProfile as updateMyProfileRequest,
+  updatePortfolioProject as updatePortfolioProjectRequest,
+} from '../../api/usersApi'
 import { ProfileEditForm } from '../../components/ProfileEditForm/ProfileEditForm'
 import { ProjectForm } from '../../components/ProjectForm/ProjectForm'
 import { updateCurrentUserProfile } from '../../store/authSlice'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import {
-  addPortfolioProject,
-  deletePortfolioProject,
-  updatePortfolioProject,
-  updateProfile,
-} from '../../store/profileSlice'
+import { setProfile } from '../../store/profileSlice'
 import type { PortfolioProject } from '../../types/profile'
 import { saveAuthUser } from '../../utils/authStorage'
 import { saveUserProfile } from '../../utils/profileStorage'
@@ -21,58 +23,77 @@ export function ProfilePage() {
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isProjectFormOpen, setIsProjectFormOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<PortfolioProject | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  if (!profile) {
-    return (
-      <section className="profile-page">
-        <div className="profile-page__content">
-          <h1 className="profile-page__section-title">Профиль не найден</h1>
-        </div>
-      </section>
-    )
-  }
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        setIsLoading(true)
+        setError('')
 
-  const handleSaveProfile = (values: {
+        const data = await fetchMyProfile()
+        dispatch(setProfile(data))
+        saveUserProfile(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Не удалось загрузить профиль')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void loadProfile()
+  }, [dispatch])
+
+  const handleSaveProfile = async (values: {
     firstName: string
     lastName: string
     nickname: string
-    role: typeof profile.role
+    role: string
     description: string
     workplace: string
   }) => {
-    const updatedProfile = {
-      ...profile,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      nickname: values.nickname,
-      role: values.role,
-      description: values.description,
-      workplace: values.workplace,
+    if (!profile) {
+      return
     }
 
-    dispatch(updateProfile(values))
+    try {
+      setError('')
 
-    dispatch(
-      updateCurrentUserProfile({
+      const updatedProfile = await updateMyProfileRequest({
         firstName: values.firstName,
         lastName: values.lastName,
         nickname: values.nickname,
-        role: values.role,
-      }),
-    )
+        role: values.role as typeof profile.role,
+        description: values.description,
+        workplace: values.workplace,
+      })
 
-    saveUserProfile(updatedProfile)
+      dispatch(setProfile(updatedProfile))
+      saveUserProfile(updatedProfile)
 
-    saveAuthUser({
-      id: profile.userId,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      nickname: values.nickname,
-      email: profile.email ?? '',
-      role: values.role,
-    })
+      dispatch(
+        updateCurrentUserProfile({
+          firstName: updatedProfile.firstName,
+          lastName: updatedProfile.lastName,
+          nickname: updatedProfile.nickname,
+          role: updatedProfile.role,
+        }),
+      )
 
-    setIsEditOpen(false)
+      saveAuthUser({
+        id: updatedProfile.userId,
+        firstName: updatedProfile.firstName,
+        lastName: updatedProfile.lastName,
+        nickname: updatedProfile.nickname,
+        email: updatedProfile.email ?? '',
+        role: updatedProfile.role,
+      })
+
+      setIsEditOpen(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось обновить профиль')
+    }
   }
 
   const handleOpenCreateProject = () => {
@@ -90,62 +111,62 @@ export function ProfilePage() {
     setIsProjectFormOpen(false)
   }
 
-  const handleSubmitProject = (values: {
+  const handleSubmitProject = async (values: {
     title: string
     description: string
     links: string[]
   }) => {
-    if (editingProject) {
-      const updatedProject: PortfolioProject = {
-        ...editingProject,
-        title: values.title,
-        description: values.description,
-        links: values.links,
-      }
+    try {
+      setError('')
 
-      dispatch(updatePortfolioProject(updatedProject))
+      const updatedProfile = editingProject
+        ? await updatePortfolioProjectRequest(editingProject.id, values)
+        : await addPortfolioProjectRequest(values)
 
-      saveUserProfile({
-        ...profile,
-        portfolio: profile.portfolio.map((project) =>
-          project.id === updatedProject.id ? updatedProject : project,
-        ),
-      })
-
+      dispatch(setProfile(updatedProfile))
+      saveUserProfile(updatedProfile)
       handleCloseProjectForm()
-      return
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось сохранить проект')
     }
-
-    const newProject: PortfolioProject = {
-      id: crypto.randomUUID(),
-      title: values.title,
-      description: values.description,
-      links: values.links,
-    }
-
-    dispatch(addPortfolioProject(newProject))
-
-    saveUserProfile({
-      ...profile,
-      portfolio: [newProject, ...profile.portfolio],
-    })
-
-    handleCloseProjectForm()
   }
 
-  const handleDeleteProject = (projectId: string) => {
+  const handleDeleteProject = async (projectId: string) => {
     const shouldDelete = window.confirm('Удалить этот проект?')
 
     if (!shouldDelete) {
       return
     }
 
-    dispatch(deletePortfolioProject(projectId))
+    try {
+      setError('')
+      const updatedProfile = await deletePortfolioProjectRequest(projectId)
+      dispatch(setProfile(updatedProfile))
+      saveUserProfile(updatedProfile)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось удалить проект')
+    }
+  }
 
-    saveUserProfile({
-      ...profile,
-      portfolio: profile.portfolio.filter((project) => project.id !== projectId),
-    })
+  if (isLoading && !profile) {
+    return (
+      <section className="profile-page">
+        <div className="profile-page__content">
+          <h1 className="profile-page__section-title">Загрузка профиля...</h1>
+        </div>
+      </section>
+    )
+  }
+
+  if (!profile) {
+    return (
+      <section className="profile-page">
+        <div className="profile-page__content">
+          <h1 className="profile-page__section-title">Профиль не найден</h1>
+          {error && <p className="profile-page__panel-text">{error}</p>}
+        </div>
+      </section>
+    )
   }
 
   return (
@@ -182,6 +203,13 @@ export function ProfilePage() {
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="profile-page__empty">
+          <h3 className="profile-page__empty-title">Ошибка</h3>
+          <p className="profile-page__empty-text">{error}</p>
+        </div>
+      )}
 
       {isEditOpen && (
         <ProfileEditForm
