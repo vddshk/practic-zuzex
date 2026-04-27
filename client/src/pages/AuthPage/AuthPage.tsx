@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { fetchMyProfile } from '../../api/usersApi'
 import { loginUser, registerUser } from '../../api/authApi'
 import { ErrorMessage } from '../../components/ErrorMessage/ErrorMessage'
 import { InputField } from '../../components/InputField/InputField'
 import { RoleSelector } from '../../components/RoleSelector/RoleSelector'
 import { loginSuccess, type AuthUser } from '../../store/authSlice'
 import { useAppDispatch } from '../../store/hooks'
-import { syncProfileFromAuth } from '../../store/profileSlice'
+import { setProfile } from '../../store/profileSlice'
 import type { UserRole } from '../../types/auth'
 import { saveAuthUser } from '../../utils/authStorage'
 import { saveUserProfile } from '../../utils/profileStorage'
@@ -90,22 +91,13 @@ export function AuthPage() {
     return nextErrors.length === 0
   }
 
-  const saveLocalUserState = (user: AuthUser) => {
+  const saveLocalUserState = async (user: AuthUser) => {
     dispatch(loginSuccess(user))
-    dispatch(syncProfileFromAuth(user))
     saveAuthUser(user)
 
-    saveUserProfile({
-      userId: user.id,
-      firstName: user.firstName ?? '',
-      lastName: user.lastName ?? '',
-      nickname: user.nickname,
-      role: user.role,
-      email: user.email ?? '',
-      description: '',
-      workplace: '',
-      portfolio: [],
-    })
+    const profile = await fetchMyProfile()
+    dispatch(setProfile(profile))
+    saveUserProfile(profile)
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -138,7 +130,7 @@ export function AuthPage() {
         password,
       })
 
-      saveLocalUserState(loginResponse.user)
+      await saveLocalUserState(loginResponse.user)
       navigate('/feed')
     } catch (error) {
       setErrors([

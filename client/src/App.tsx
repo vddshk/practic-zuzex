@@ -1,15 +1,12 @@
 import { useEffect } from 'react'
 import { fetchMe } from './api/authApi'
+import { fetchMyProfile } from './api/usersApi'
+import { AppRouter } from './router/AppRouter'
 import { restoreSession } from './store/authSlice'
 import { useAppDispatch } from './store/hooks'
-import {
-  clearProfile,
-  restoreStoredProfile,
-  syncProfileFromAuth,
-} from './store/profileSlice'
-import { getAuthUser, saveAuthUser, clearAuthUser } from './utils/authStorage'
-import { getUserProfile, clearUserProfile } from './utils/profileStorage'
-import { AppRouter } from './router/AppRouter'
+import { clearProfile, setProfile } from './store/profileSlice'
+import { clearAuthUser, saveAuthUser } from './utils/authStorage'
+import { clearUserProfile, saveUserProfile } from './utils/profileStorage'
 
 function App() {
   const dispatch = useAppDispatch()
@@ -17,9 +14,9 @@ function App() {
   useEffect(() => {
     const bootstrapAuth = async () => {
       try {
-        const response = await fetchMe()
+        const authResponse = await fetchMe()
 
-        if (!response.isAuthenticated || !response.user) {
+        if (!authResponse.isAuthenticated || !authResponse.user) {
           dispatch(restoreSession(null))
           dispatch(clearProfile())
           clearAuthUser()
@@ -27,23 +24,17 @@ function App() {
           return
         }
 
-        const storedAuthUser = getAuthUser()
-        const storedProfile = getUserProfile()
+        dispatch(restoreSession(authResponse.user))
+        saveAuthUser(authResponse.user)
 
-        const resolvedUser =
-          storedAuthUser && storedAuthUser.id === response.user.id
-            ? storedAuthUser
-            : response.user
-
-        dispatch(restoreSession(resolvedUser))
-
-        if (storedProfile && storedProfile.userId === resolvedUser.id) {
-          dispatch(restoreStoredProfile(storedProfile))
-        } else {
-          dispatch(syncProfileFromAuth(resolvedUser))
+        try {
+          const profile = await fetchMyProfile()
+          dispatch(setProfile(profile))
+          saveUserProfile(profile)
+        } catch {
+          dispatch(clearProfile())
+          clearUserProfile()
         }
-
-        saveAuthUser(resolvedUser)
       } catch {
         dispatch(restoreSession(null))
         dispatch(clearProfile())
