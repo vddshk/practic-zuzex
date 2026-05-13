@@ -63,10 +63,18 @@ export class PostsService {
   private mapPost(post: any, currentUserId?: string | null) {
     const likedBy = (post.likedBy ?? []).map((id: any) => String(id))
 
+    const authorId =
+      post.author?._id
+        ? String(post.author._id)
+        : post.author
+          ? String(post.author)
+          : ''
+
     return {
       id: String(post._id),
       title: post.title,
       content: post.content,
+      authorId,
       author: post.author?.nickname ?? 'Unknown',
       type: post.type,
       direction: post.direction,

@@ -99,3 +99,130 @@
     align-items: flex-start;
   }
 }
+
+.post-card__author-link {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.post-card__author-link:hover {
+  text-decoration: underline;
+}
+
+.post-card__expand {
+  margin-top: 10px;
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.post-card__author-link {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.post-card__author-link:hover {
+  text-decoration: underline;
+}
+
+.post-card__image {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 12px 0 14px;
+  border: 1px solid var(--border);
+}
+
+.post-card__markdown {
+  color: var(--text);
+  line-height: 1.65;
+  font-size: 14px;
+}
+
+.post-card__markdown p {
+  margin: 0 0 12px;
+}
+
+.post-card__markdown h1,
+.post-card__markdown h2,
+.post-card__markdown h3 {
+  margin: 16px 0 10px;
+  line-height: 1.3;
+}
+
+.post-card__markdown ul,
+.post-card__markdown ol {
+  margin: 0 0 12px 20px;
+}
+
+.post-card__markdown pre {
+  overflow-x: auto;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+
+.post-card__markdown code {
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+  font-size: 13px;
+}
+
+.post-card__markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 12px;
+}
+
+.post-card__markdown th,
+.post-card__markdown td {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.post-card__markdown a {
+  color: var(--primary);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.post-card__markdown a:hover {
+  color: var(--primary-hover);
+}
+
+.post-card__topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.post-card__menu-button {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  background: #fff;
+  color: var(--text);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.post-card__menu-button:hover {
+  background: var(--surface-soft);
+}

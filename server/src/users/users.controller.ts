@@ -9,38 +9,45 @@ import { UsersService } from './users.service'
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get('me')
-  getMyProfile(@Req() request: Request) {
-    return this.usersService.getMyProfile(request)
+  @Get(':id')
+  getUserProfileById(@Param('id') id: string) {
+    return this.usersService.getUserProfileById(id)
   }
 
-  @Put('me')
-  updateMyProfile(@Req() request: Request, @Body() dto: UpdateProfileDto) {
-    return this.usersService.updateMyProfile(request, dto)
+  @Put(':id')
+  updateUserProfile(
+    @Req() request: Request,
+    @Param('id') id: string,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    return this.usersService.updateUserProfile(request, id, dto)
   }
 
-  @Post('me/portfolio')
+  @Post(':id/portfolio')
   addPortfolioProject(
     @Req() request: Request,
+    @Param('id') id: string,
     @Body() dto: CreatePortfolioProjectDto,
   ) {
-    return this.usersService.addPortfolioProject(request, dto)
+    return this.usersService.addPortfolioProject(request, id, dto)
   }
 
-  @Put('me/portfolio/:projectId')
+  @Put(':id/portfolio/:projectId')
   updatePortfolioProject(
     @Req() request: Request,
+    @Param('id') id: string,
     @Param('projectId') projectId: string,
     @Body() dto: UpdatePortfolioProjectDto,
   ) {
-    return this.usersService.updatePortfolioProject(request, projectId, dto)
+    return this.usersService.updatePortfolioProject(request, id, projectId, dto)
   }
 
-  @Delete('me/portfolio/:projectId')
+  @Delete(':id/portfolio/:projectId')
   deletePortfolioProject(
     @Req() request: Request,
+    @Param('id') id: string,
     @Param('projectId') projectId: string,
   ) {
-    return this.usersService.deletePortfolioProject(request, projectId)
+    return this.usersService.deletePortfolioProject(request, id, projectId)
   }
 }

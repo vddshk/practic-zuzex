@@ -10,7 +10,7 @@ import {
 export class CreatePortfolioProjectDto {
   @IsString()
   @MaxLength(100)
-  title: string
+  title!: string
 
   @IsOptional()
   @IsString()
@@ -24,5 +24,6 @@ export class CreatePortfolioProjectDto {
 
   @IsOptional()
   @IsString()
+  @IsUrl()
   previewImage?: string
 }

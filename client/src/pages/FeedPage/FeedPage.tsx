@@ -7,6 +7,7 @@ import {
   unlikePost,
   updatePost as updatePostRequest,
 } from '../../api/postsApi'
+import { ConfirmationModal } from '../../components/ConfirmationModal/ConfirmationModal'
 import { FilterBar } from '../../components/FilterBar/FilterBar'
 import { PostCard } from '../../components/PostCard/PostCard'
 import { PostForm } from '../../components/PostForm/PostForm'
@@ -28,8 +29,9 @@ export function FeedPage() {
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingPost, setEditingPost] = useState<Post | null>(null)
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string>('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -53,6 +55,27 @@ export function FeedPage() {
     void loadPosts()
   }, [dispatch, filters.type, filters.direction])
 
+  useEffect(() => {
+    if (isFormOpen) {
+      return
+    }
+
+    const intervalId = window.setInterval(async () => {
+      try {
+        const data = await fetchPosts({
+          type: filters.type,
+          direction: filters.direction,
+        })
+
+        dispatch(setPosts(data))
+      } catch {
+        // тихо игнорируем, чтобы не спамить ошибками при временном сбое
+      }
+    }, 4000)
+
+    return () => window.clearInterval(intervalId)
+  }, [dispatch, filters.type, filters.direction, isFormOpen])
+
   const handleOpenCreate = () => {
     setEditingPost(null)
     setIsFormOpen(true)
@@ -73,6 +96,7 @@ export function FeedPage() {
     content: string
     type: Post['type']
     direction: Post['direction']
+    previewImage: string
   }) => {
     try {
       setError('')
@@ -92,17 +116,25 @@ export function FeedPage() {
     }
   }
 
-  const handleDeletePost = async (postId: string) => {
-    const shouldDelete = window.confirm('Удалить этот пост?')
+  const handleRequestDeletePost = () => {
+    if (!editingPost) {
+      return
+    }
 
-    if (!shouldDelete) {
+    setDeletingPostId(editingPost.id)
+  }
+
+  const handleConfirmDeletePost = async () => {
+    if (!deletingPostId) {
       return
     }
 
     try {
       setError('')
-      await deletePostRequest(postId)
-      dispatch(deletePost(postId))
+      await deletePostRequest(deletingPostId)
+      dispatch(deletePost(deletingPostId))
+      setDeletingPostId(null)
+      handleCloseForm()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось удалить пост')
     }
@@ -128,6 +160,10 @@ export function FeedPage() {
         <div>
           <p className="feed-page__eyebrow">Главная страница</p>
           <h1 className="feed-page__title">Добро пожаловать, {user?.nickname}</h1>
+          <p className="feed-page__subtitle">
+            Здесь пользователи просматривают посты, фильтруют ленту, создают
+            публикации, редактируют их и взаимодействуют с контентом через лайки.
+          </p>
         </div>
 
         <button
@@ -140,10 +176,32 @@ export function FeedPage() {
       </div>
 
       {isFormOpen && (
-        <PostForm
-          initialPost={editingPost}
-          onSubmit={handleSubmitPost}
-          onCancel={handleCloseForm}
+        <div
+          className="feed-page__modal-overlay"
+          onClick={handleCloseForm}
+        >
+          <div
+            className="feed-page__modal-window"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <PostForm
+              initialPost={editingPost}
+              onSubmit={handleSubmitPost}
+              onCancel={handleCloseForm}
+              onDelete={editingPost ? handleRequestDeletePost : undefined}
+            />
+          </div>
+        </div>
+      )}
+
+      {deletingPostId && (
+        <ConfirmationModal
+          title="Удалить пост"
+          message="Пост будет удалён без возможности восстановления."
+          confirmText="Удалить"
+          cancelText="Отмена"
+          onConfirm={handleConfirmDeletePost}
+          onCancel={() => setDeletingPostId(null)}
         />
       )}
 
@@ -161,7 +219,9 @@ export function FeedPage() {
           <div className="feed-page__panel">
             <h2 className="feed-page__panel-title">Фильтры</h2>
             <p className="feed-page__panel-text">Тип: {filters.type}</p>
-            <p className="feed-page__panel-text">Направление: {filters.direction}</p>
+            <p className="feed-page__panel-text">
+              Направление: {filters.direction}
+            </p>
           </div>
 
           <div className="feed-page__panel">
@@ -185,7 +245,6 @@ export function FeedPage() {
                 post={post}
                 isOwner={post.author === user?.nickname}
                 onEdit={handleOpenEdit}
-                onDelete={handleDeletePost}
                 onToggleLike={handleToggleLike}
               />
             ))

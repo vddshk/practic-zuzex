@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -7,10 +8,10 @@ import {
 import { JwtService } from '@nestjs/jwt'
 import { InjectModel } from '@nestjs/mongoose'
 import type { Request } from 'express'
-import { Model } from 'mongoose'
-import { UpdateProfileDto } from './dto/update-profile.dto'
+import { Model, Types } from 'mongoose'
 import { CreatePortfolioProjectDto } from './dto/create-portfolio-project.dto'
 import { UpdatePortfolioProjectDto } from './dto/update-portfolio-project.dto'
+import { UpdateProfileDto } from './dto/update-profile.dto'
 import { User } from './schemas/user.schema'
 
 type JwtPayload = {
@@ -35,6 +36,10 @@ export class UsersService {
   }
 
   findById(id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      return null
+    }
+
     return this.userModel.findById(id).exec()
   }
 
@@ -65,7 +70,7 @@ export class UsersService {
 
     try {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token)
-      const user = await this.userModel.findById(payload.sub)
+      const user = await this.userModel.findById(payload.sub).exec()
 
       if (!user) {
         throw new UnauthorizedException('Unauthorized')
@@ -75,6 +80,16 @@ export class UsersService {
     } catch {
       throw new UnauthorizedException('Unauthorized')
     }
+  }
+
+  private async ensureOwner(request: Request, userId: string) {
+    const currentUser = await this.resolveCurrentUser(request)
+
+    if (String(currentUser._id) !== userId) {
+      throw new ForbiddenException('Forbidden')
+    }
+
+    return currentUser
   }
 
   private mapUserProfile(user: any) {
@@ -92,21 +107,34 @@ export class UsersService {
         title: project.title,
         description: project.description ?? '',
         links: project.links ?? [],
-        previewImage: project.previewImage || undefined,
+        previewImage: project.previewImage || '',
       })),
     }
   }
 
-  async getMyProfile(request: Request) {
-    const user = await this.resolveCurrentUser(request)
+  async getUserProfileById(id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('User not found')
+    }
+
+    const user = await this.userModel.findById(id).exec()
+
+    if (!user) {
+      throw new NotFoundException('User not found')
+    }
+
     return this.mapUserProfile(user)
   }
 
-  async updateMyProfile(request: Request, dto: UpdateProfileDto) {
-    const user = await this.resolveCurrentUser(request)
+  async updateUserProfile(request: Request, id: string, dto: UpdateProfileDto) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('User not found')
+    }
+
+    const user = await this.ensureOwner(request, id)
 
     if (dto.nickname !== user.nickname) {
-      const existingUser = await this.userModel.findOne({ nickname: dto.nickname })
+      const existingUser = await this.userModel.findOne({ nickname: dto.nickname }).exec()
 
       if (existingUser && String(existingUser._id) !== String(user._id)) {
         throw new ConflictException('Nickname already exists')
@@ -127,9 +155,14 @@ export class UsersService {
 
   async addPortfolioProject(
     request: Request,
+    id: string,
     dto: CreatePortfolioProjectDto,
   ) {
-    const user = await this.resolveCurrentUser(request)
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('User not found')
+    }
+
+    const user = await this.ensureOwner(request, id)
 
     user.portfolio.unshift({
       title: dto.title,
@@ -145,10 +178,15 @@ export class UsersService {
 
   async updatePortfolioProject(
     request: Request,
+    id: string,
     projectId: string,
     dto: UpdatePortfolioProjectDto,
   ) {
-    const user = await this.resolveCurrentUser(request)
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('User not found')
+    }
+
+    const user = await this.ensureOwner(request, id)
 
     const project = user.portfolio.find(
       (item: any) => String(item._id) === projectId,
@@ -179,8 +217,12 @@ export class UsersService {
     return this.mapUserProfile(user)
   }
 
-  async deletePortfolioProject(request: Request, projectId: string) {
-    const user = await this.resolveCurrentUser(request)
+  async deletePortfolioProject(request: Request, id: string, projectId: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('User not found')
+    }
+
+    const user = await this.ensureOwner(request, id)
 
     const exists = user.portfolio.some(
       (item: any) => String(item._id) === projectId,
