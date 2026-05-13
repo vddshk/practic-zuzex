@@ -1,50 +1,63 @@
 .project-form {
-  padding: 24px;
-  border-radius: 24px;
-  background-color: #ffffff;
-  box-shadow: 0 12px 40px rgba(16, 24, 40, 0.08);
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
 }
 
 .project-form__header {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .project-form__eyebrow {
-  margin: 0 0 8px;
-  color: #667085;
-  font-size: 14px;
+  margin: 0 0 6px;
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .project-form__title {
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .project-form__body {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .project-form__field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .project-form__label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .project-form__input,
 .project-form__textarea {
   width: 100%;
-  border: 1px solid #d0d5dd;
-  border-radius: 12px;
-  padding: 12px 14px;
-  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 13px;
+  background: #fff;
+  color: var(--text);
   outline: none;
+}
+
+.project-form__input::placeholder,
+.project-form__textarea::placeholder {
+  color: #9ca3af;
+}
+
+.project-form__input:focus,
+.project-form__textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .project-form__textarea {
@@ -54,31 +67,32 @@
 .project-form__links {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .project-form__actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 10px;
 }
 
 .project-form__primary,
 .project-form__secondary {
-  border-radius: 12px;
-  padding: 12px 16px;
+  border-radius: 10px;
+  padding: 10px 14px;
   cursor: pointer;
 }
 
 .project-form__primary {
   border: none;
-  background-color: #111827;
-  color: #ffffff;
+  background: var(--primary);
+  color: #fff;
 }
 
 .project-form__secondary {
-  border: 1px solid #d0d5dd;
-  background-color: #ffffff;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
 }
 
 @media (max-width: 640px) {

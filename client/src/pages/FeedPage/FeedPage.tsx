@@ -128,10 +128,6 @@ export function FeedPage() {
         <div>
           <p className="feed-page__eyebrow">Главная страница</p>
           <h1 className="feed-page__title">Добро пожаловать, {user?.nickname}</h1>
-          <p className="feed-page__subtitle">
-            Теперь лента работает через backend API: посты загружаются с сервера,
-            создаются, редактируются, удаляются и лайкаются по-настоящему.
-          </p>
         </div>
 
         <button

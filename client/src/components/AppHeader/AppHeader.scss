@@ -1,78 +1,81 @@
 .app-header {
   position: sticky;
   top: 0;
-  z-index: 10;
-  border-bottom: 1px solid #e4e7ec;
-  background-color: #ffffff;
+  z-index: 20;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
 }
 
 .app-header__inner {
-  max-width: 1200px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 18px 24px;
+  padding: 14px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
 }
 
 .app-header__brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .app-header__logo {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #111827;
-  color: #ffffff;
+  background: var(--primary);
+  color: #fff;
   font-weight: 700;
-  font-size: 20px;
+  font-size: 15px;
 }
 
 .app-header__title {
   margin: 0;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
 }
 
 .app-header__subtitle {
   margin: 2px 0 0;
-  color: #667085;
-  font-size: 13px;
+  color: var(--text-muted);
+  font-size: 12px;
 }
 
 .app-header__nav {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .app-header__link {
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: 10px;
-  color: #344054;
-  transition: 0.2s;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .app-header__link:hover {
-  background-color: #f2f4f7;
+  background: var(--surface-soft);
+  color: var(--text);
 }
 
 .app-header__link.active {
-  background-color: #111827;
-  color: #ffffff;
+  background: var(--primary-soft);
+  color: var(--primary);
 }
 
 .app-header__actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .app-header__user {
@@ -82,21 +85,27 @@
 }
 
 .app-header__nickname {
+  font-size: 14px;
   font-weight: 600;
 }
 
 .app-header__role {
-  font-size: 13px;
-  color: #667085;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .app-header__logout {
-  border: none;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 10px 14px;
-  background-color: #111827;
-  color: #ffffff;
+  padding: 8px 12px;
+  background: var(--surface);
+  color: var(--text);
   cursor: pointer;
+}
+
+.app-header__logout:hover {
+  background: var(--surface-soft);
+  border-color: var(--border-strong);
 }
 
 @media (max-width: 900px) {
