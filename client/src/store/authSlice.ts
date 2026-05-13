@@ -1,0 +1,71 @@
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import type { UserRole } from '../types/auth'
+
+export type AuthUser = {
+  id: string
+  firstName?: string
+  lastName?: string
+  nickname: string
+  email?: string
+  role: UserRole
+}
+
+type AuthState = {
+  isAuthenticated: boolean
+  isAuthChecked: boolean
+  user: AuthUser | null
+}
+
+const initialState: AuthState = {
+  isAuthenticated: false,
+  isAuthChecked: false,
+  user: null,
+}
+
+const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    loginSuccess(state, action: PayloadAction<AuthUser>) {
+      state.isAuthenticated = true
+      state.isAuthChecked = true
+      state.user = action.payload
+    },
+
+    logout(state) {
+      state.isAuthenticated = false
+      state.isAuthChecked = true
+      state.user = null
+    },
+
+    restoreSession(state, action: PayloadAction<AuthUser | null>) {
+      state.isAuthenticated = Boolean(action.payload)
+      state.isAuthChecked = true
+      state.user = action.payload
+    },
+
+    updateCurrentUserProfile(
+      state,
+      action: PayloadAction<{
+        firstName: string
+        lastName: string
+        nickname: string
+        role: UserRole
+      }>,
+    ) {
+      if (!state.user) {
+        return
+      }
+
+      state.user.firstName = action.payload.firstName
+      state.user.lastName = action.payload.lastName
+      state.user.nickname = action.payload.nickname
+      state.user.role = action.payload.role
+    },
+  },
+})
+
+export const { loginSuccess, logout, restoreSession, updateCurrentUserProfile } =
+  authSlice.actions
+
+export const authReducer = authSlice.reducer

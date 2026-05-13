@@ -1,0 +1,129 @@
+.feed-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.feed-page__hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
+.feed-page__eyebrow {
+  margin: 0 0 6px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.feed-page__title {
+  margin: 0 0 8px;
+  font-size: 28px;
+  line-height: 1.15;
+}
+
+.feed-page__subtitle {
+  margin: 0;
+  max-width: 760px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.feed-page__create-button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.feed-page__create-button:hover {
+  background: var(--primary-hover);
+}
+
+.feed-page__grid {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 18px;
+}
+
+.feed-page__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.feed-page__panel {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.feed-page__panel-title {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.feed-page__panel-text {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+.feed-page__panel-text + .feed-page__panel-text {
+  margin-top: 6px;
+}
+
+.feed-page__content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.feed-page__empty {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.feed-page__empty-title {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.feed-page__empty-text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 960px) {
+  .feed-page__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .feed-page__hero {
+    flex-direction: column;
+  }
+
+  .feed-page__title {
+    font-size: 24px;
+  }
+}
