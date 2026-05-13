@@ -6,21 +6,19 @@ import { AppModule } from './app.module'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    process.env.FRONTEND_URL,
+  ].filter(Boolean)
+
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin) {
         return callback(null, true)
       }
 
-      const isLocalhost =
-        /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
-
-      const isLan =
-        /^http:\/\/(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+)(:\d+)?$/.test(
-          origin,
-        )
-
-      if (isLocalhost || isLan) {
+      if (allowedOrigins.includes(origin)) {
         return callback(null, true)
       }
 

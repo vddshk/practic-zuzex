@@ -85,11 +85,12 @@ export class AuthService {
     }
 
     const token = await this.jwtService.signAsync(payload)
+    const isProduction = process.env.NODE_ENV === 'production'
 
     response.cookie('token', token, {
       httpOnly: true,
-      sameSite: 'lax',
-      secure: false,
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     })
 
@@ -107,10 +108,12 @@ export class AuthService {
   }
 
   logout(response: Response) {
+    const isProduction = process.env.NODE_ENV === 'production'
+
     response.clearCookie('token', {
       httpOnly: true,
-      sameSite: 'lax',
-      secure: false,
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction,
     })
 
     return {
